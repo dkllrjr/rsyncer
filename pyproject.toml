@@ -13,6 +13,6 @@ authors = [
 license = {file = "LICENSE"}
 dynamic = ['dependencies', 'scripts', 'entry-points']
 
-#[project.urls]
-#Homepage = "https://github.com/dkllrjr/douglog"
-#Repository = "https://github.com/dkllrjr/douglog.git"
+[project.urls]
+Homepage = "https://github.com/dkllrjr/rsyncer"
+Repository = "https://github.com/dkllrjr/rsyncer.git"
