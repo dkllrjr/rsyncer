@@ -1,0 +1,11 @@
+[Unit]
+Description=Rsyncer backup service
+After=network-online.target sshd.service
+
+[Service]
+ExecStart=/path/to/bin/rsyncer run
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

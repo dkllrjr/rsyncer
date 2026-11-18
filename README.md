@@ -13,19 +13,16 @@ Dependencies:
 Default location in `~/.config/rsyncer.toml`.
 
 ```
-[sources]
-[sources.hostname] # for remote sources
-paths = ["/path/to/dir/to/backup", "/different/path/to/another/dir", "/a/third/path/etc"]
+[links]
+[links.gitea]
+source = "/doom/gitea"
+destination = "chinook:/fins/rsyncer"
+frequencies = ["daily", "monthly"]
 
-[sources.local] # for local sources
-paths = ["/path/to/dir/to/backup", "/different/path/to/another/dir", "/a/third/path/etc"]
-
-[destinations]
-[destinations.hostname]
-path = "/path/on/host"
-
-[frequency]
-frequencies = ["daily", "weekly", "monthly"] # allowed are dailly, weekly, and monthly
+[links.bibtheque]
+source = "nanook:/home/doug/bibtheque"
+destination = "/doom/rsyncer"
+frequencies = ["daily", "monthly"]
 
 [log]
 path = "~/.logs/rsyncer.log"

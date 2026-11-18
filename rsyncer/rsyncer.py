@@ -21,20 +21,9 @@ def _log(config, content):
         file.write(content + '\n')
 
 
-def _run_freq(config, source, destination, frequency):
+def _run(source, destination, frequency):
     cmd = ['rsync', '--progress', '-r', source, destination + '/' + frequency]
     subprocess.run(cmd)
-
-
-def _run(config, frequency):
-    for source in config['sources']:
-        for path in config['sources'][source]['paths']: # for each source's path
-            for destination in config['destinations']: # for each destination
-
-                if source in ['local']:
-                    _run_freq( config, Path(path).expanduser(), destination + ':' + config['destinations'][destination]['path'] , frequency )
-                else:
-                    _run_freq( config, source + ':' + str(Path(path).expanduser()), destination + ':' + config['destinations'][destination]['path'], frequency )
 
 #  ──────────────────────────────────────────────────────────────────────────
 # global options
@@ -68,10 +57,11 @@ def rsyncer(ctx, config):
             toml = tomllib.load(file)
 
         # required config options
-        required = ['sources', 'destinations']
-        for option in required:
-            if option not in toml:
-                raise click.ClickException('Config requires "' + key + '" to be set.')
+        required = ['source', 'destination', 'frequencies']
+        for key in required:
+            for link in toml['links']:
+                if key not in toml['links'][link]:
+                    raise click.ClickException('Config requires "' + key + '" to be set for link "' + link + '".')
 
         # setting config
         ctx.obj = toml
@@ -90,21 +80,25 @@ def run(obj, loop_sleep, force):
     """Run"""
 
     def _run_loop(config, current_time, old_time, force):
-        for frequency in config['frequency']['frequencies']:
-            if frequency == 'daily':
-                if current_time.day > old_time.day or force:
-                    _run(config, frequency)
-                    _log(config, current_time.isoformat() + ' ' + frequency)
+        for link in config['links']:
+            source = config['links'][link]['source']
+            destination = config['links'][link]['destination']
 
-            elif frequency == 'weekly':
-                if current_time.weekday() == 6 or force: 
-                    _run(config, frequency)
-                    _log(config, current_time.isoformat() + ' ' + frequency)
+            for frequency in config['links'][link]['frequencies']:
+                if frequency == 'daily':
+                    if current_time.day > old_time.day or force:
+                        _run(source, destination, frequency)
+                        _log(config, current_time.isoformat() + ' ' + link + ', ' + source + ', ' + destination + ', ' + frequency)
 
-            elif frequency == 'monthly':
-                if current_time.day == 1 or force: 
-                    _run(config, frequency)
-                    _log(config, current_time.isoformat() + ' ' + frequency)
+                elif frequency == 'weekly':
+                    if current_time.weekday() == 6 or force: 
+                        _run(source, destination, frequency)
+                        _log(config, current_time.isoformat() + ' ' + link + ', ' + source + ', ' + destination + ', ' + frequency)
+
+                elif frequency == 'monthly':
+                    if current_time.day == 1 or force: 
+                        _run(source, destination, frequency)
+                        _log(config, current_time.isoformat() + ' ' + link + ', ' + source + ', ' + destination + ', ' + frequency)
 
 
     # run time loop
